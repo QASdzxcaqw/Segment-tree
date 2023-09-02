@@ -18,20 +18,23 @@ private:
 public:
     SegmentTree(int h, const std::vector<int>& endpoints) : h(h) {
         nodes.resize((1 << (h + 1)) - 1, TreeNode(0, 0));
-        buildTree(0, 0, endpoints.size() - 1, endpoints);
+        buildTree(0, 0, endpoints.size()-1, endpoints);
     }
 
-    void buildTree(int nodeIndex, int left, int right, const std::vector<int>& endpoints) {
-        nodes[nodeIndex].start = endpoints[left];
-        nodes[nodeIndex].end = endpoints[right];
 
-        if (left == right) {
-            return; // Leaf node
+    void buildTree(int nodeIndex, int start, int end, const std::vector<int>& endpoints) {
+        if (start > end) {
+            return;
         }
 
-        int mid = (left + right) / 2;
-        buildTree(2 * nodeIndex + 1, left, mid, endpoints);     // Build left child
-        buildTree(2 * nodeIndex + 2, mid + 1, right, endpoints); // Build right child
+        nodes[nodeIndex].start = endpoints[start];
+        nodes[nodeIndex].end = endpoints[end];
+
+        if (start < end) {
+            int mid = start + (end - start) / 2;
+            buildTree(2 * nodeIndex + 1, start, mid, endpoints);     // Build left subtree
+            buildTree(2 * nodeIndex + 2, mid + 1, end, endpoints);  // Build right subtree
+        }
     }
 
     void insertSegment(int nodeIndex, int segmentStart, int segmentEnd, const std::string& segmentName) {
@@ -59,19 +62,24 @@ public:
         removeSegment(2 * nodeIndex + 2, segmentName); // Remove from right child
     }
 
-    void printTree(int nodeIndex = 0) {
+    void printTree(int nodeIndex = 0, int level = 0) {
         if (nodeIndex >= nodes.size()) {
             return;
         }
 
-        printTree(2 * nodeIndex + 1); // Print left child
-        std::cout << "Node: [" << nodes[nodeIndex].start << ", " << nodes[nodeIndex].end << "]"
-                  << " Segment Names: ";
+        for (int i = 0; i < level; ++i) {
+            std::cout << "  ";
+        }
+
+        std::cout << "|- Node: [" << nodes[nodeIndex].start << ", " << nodes[nodeIndex].end << "]"
+                  << " Segments: ";
         for (const std::string& name : nodes[nodeIndex].segmentNames) {
             std::cout << name << " ";
         }
         std::cout << std::endl;
-        printTree(2 * nodeIndex + 2); // Print right child
+
+        printTree(2 * nodeIndex + 1, level + 1); // Print left child
+        printTree(2 * nodeIndex + 2, level + 1); // Print right child
     }
 
 
@@ -80,17 +88,17 @@ public:
 
 int main() {
     int h = 4; // Depth of the tree
-    std::vector<int> endpoints = {3, 6, 8, 11, 14, 15, 19, 21, 23, 27, 34, 36, 38};
+    std::vector<int> endpoints = {3, 6, 8, 11, 14, 15, 19, 21, 23, 27, 34, 36};
 
     SegmentTree tree(h, endpoints);
 
-    tree.insertSegment(0, 3, 11, "A");
-    tree.insertSegment(0, 8, 27, "B");
-    tree.insertSegment(0, 14, 38, "C");
+//    tree.insertSegment(0, 3, 11, "A");
+//    tree.insertSegment(0, 8, 27, "B");
+//    tree.insertSegment(0, 14, 38, "C");
 
     tree.printTree();
-    tree.removeSegment(0, "B");
-    tree.printTree();
+    //tree.removeSegment(0, "B");
+    //tree.printTree();
 
     return 0;
 }
